@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<title>Grid</title>
+<meta charset="utf-8">
+<script>
+
+window.onload= function() {
+imgFile="gridy.png";
+zoom=1;
+step=40;
+prop=3;
+propWidth=1;
+stepWidth=1;
+var c = document.getElementById("gridCanvas");
+c.addEventListener("mousedown", doMouseDown, false);
+document.getElementById("iZoom").onchange= function() { zoom=parseFloat(document.getElementById("iZoom").value) ;x()};
+document.getElementById("iStep").onchange=function() { step=parseInt(document.getElementById("iStep").value) ;x()};
+document.getElementById("iProp").onchange=function() { prop=parseInt(document.getElementById("iProp").value) ;x()};
+document.getElementById("imgUrl").onchange=function() { imgFile=document.getElementById("imgUrl").value ;x()};
+document.getElementById("iStepWidth").onchange= function() { stepWidth=parseFloat(document.getElementById("iStepWidth").value) ;x()};
+document.getElementById("iPropWidth").onchange= function() { propWidth=parseFloat(document.getElementById("iPropWidth").value) ;x()};
+x();
+}
+
+function doMouseDown(event) {
+var x=event.pageX;
+var y=event.pageY;
+console.log("X="+x + " Y="+y);
+}
+
+
+function handleFile(f) {
+  imgFile=f[0].name;
+  x();
+}
+
+function addZoom(val) {
+  zoom+=val;
+  document.getElementById("iZoom").value = zoom;
+  x();
+}
+
+function addPropWidth(val) {
+  propWidth+=val;
+  document.getElementById("iPropWidth").value = propWidth;
+  x();
+}
+
+function addStepWidth(val) {
+  stepWidth+=val;
+  document.getElementById("iStepWidth").value = stepWidth;
+  x();
+}
+
+function addStep(val) {
+  if ( step + val < 20) {
+     return;
+  }
+  step+=val;
+  document.getElementById("iStep").value = step;
+  x();
+}
+
+function addProp(val) {
+  if ( prop + val < 2) {
+     return;
+  }
+  prop+=val;
+  document.getElementById("iProp").value = prop;
+  x();
+}
+
+function x() {
+     var img = new Image();
+        img.onload = function() {
+        loadCanvas(img);
+        };
+     img.src=imgFile ;
+}
+
+function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
+    console.log("xsize="+xsize+" ysize="+ysize+" color="+color+" step="+step+" factor="+factor+" width="+width) ;
+    ctx.beginPath();
+    ctx.font="20px Georgia";
+    ctx.strokeStyle=color;
+    if (width <= 0 ) {
+      return;
+    }
+    ctx.lineWidth=width;
+    xStep=step;
+    yStep=step;
+    if (step == 0) {
+      xStep=Math.round(xsize/factor);
+      yStep=Math.round(ysize/factor);
+    }
+    for (i=0;i<xsize;i+=xStep) {
+      ctx.moveTo(i,0);
+      ctx.lineTo(i,ysize);
+      ctx.stroke();
+    }
+    for (i=0;i<ysize;i+=yStep) {
+      ctx.moveTo(0,i);
+      ctx.lineTo(xsize,i);
+      ctx.stroke();
+    }
+    count=1;
+    for (i=step;i<cxsize;i+=step) {
+      ctx.fillText(count,i+step/2,step/2);
+      count++;
+    }
+    count=1;
+    for (i=step;i<cysize;i+=step) {
+      ctx.fillText(count,step/2,i+step/2);
+      count++;
+    }
+     ctx.closePath();
+}
+
+function loadCanvas(img) {
+    //alert("loadCanvas");   
+    var c = document.getElementById("gridCanvas");
+    c.width= img.width*zoom;
+    c.height = img.height*zoom;
+    xRatio= c.width/img.width;
+    yRatio= c.height/img.height;
+    ratio=xRatio;
+    if ( yRatio < ratio)  {
+       ratio=yRatio;
+    }
+    var ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
+    drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',step,0,stepWidth);
+    drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,prop,propWidth);
+};
+
+</script>
+
+</head>
+<body>
+<table border>
+<tr><td>
+Local file<input type="file" accept=".jpg, .jpeg, .png" id="input" onchange="handleFile(this.files)">
+<br/>Url <input type="text" id="imgUrl">
+</td></tr>
+<tr><td>Zoom<input type="text" id="iZoom" value="1">
+<input type="button" id=="zoomIncr" value="+" onClick="addZoom(0.1)">
+<input type="button" id="zoomDecr" value="-" onClick="addZoom(-0.1)">
+<br/>Step<input type="text" id="iStep" value="40">
+<input type="button" id=="stepIncr" value="+" onClick="addStep(10)">
+<input type="button" id="stepDecr" value="-" onClick="addStep(-10)">
+stepWidth<input type="text" id="iStepWidth" value="1">
+<input type="button" id=="widthStepIncr" value="+" onClick="addStepWidth(0.1)">
+<input type="button" id="widthStepDecr" value="-" onClick="addStepWidth(-0.1)">
+<br/>
+Proportion<input type="text" id="iProp" value="3">
+<input type="button" id=="propIncr" value="+" onClick="addProp(1)">
+<input type="button" id="propDecr" value="-" onClick="addProp(-1)">
+propWidth<input type="text" id="iPropWidth" value="1">
+<input type="button" id=="widthPropIncr" value="+" onClick="addPropWidth(0.1)">
+<input type="button" id="widthPropDecr" value="-" onClick="addPropWidth(-0.1)">
+</td></tr>
+</table>
+<table>
+<tr><td><canvas id="gridCanvas"> </canvas></td></tr>
+</table>
+</html>
