@@ -37,6 +37,10 @@ function doMouseUp(event) {
 var pos = getMousePos(this, event);
 target.x2=pos.x;
 target.y2=pos.y;
+//target.x1=2*target.x1-target.x2;
+//target.y1=2*target.y1-target.y2;
+target.x1=Math.abs(target.x1+target.x2)/2;
+target.y1=Math.abs(target.y1+target.y2)/2;
 target.dialen= Math.sqrt(Math.pow(target.x1-target.x2,2) + Math.pow(target.y1-target.y2,2));
 draw();
 }
@@ -114,12 +118,13 @@ function drawTarget(ctx) {
     ctx.beginPath();
     ctx.moveTo(target.x1*zoom,target.y1*zoom);
     ctx.lineTo(target.x2*zoom,target.y2*zoom);
+    ctx.arc(target.x1*zoom,target.y1*zoom,2,0,2*Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'green';
     ctx.stroke();
     ctx.closePath();
 
-    //ctx.arc(target.x1*zoom,target.y1*zoom,2,0,2*Math.PI);
+
     //var d= Math.sqrt(Math.pow(target.x1*zoom-target.x2*zoom,2) + Math.pow(target.y1*zoom-target.y2*zoom,2));
     var d= target.dialen*zoom;
     console.log("d="+d);
