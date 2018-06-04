@@ -13,7 +13,7 @@ prop=3;
 propWidth=1;
 stepWidth=1;
 split=4;
-rect={};
+target={};
 var c = document.getElementById("gridCanvas");
 c.addEventListener("mousedown", doMouseDown, false);
 c.addEventListener("mouseup", doMouseUp, false);
@@ -29,20 +29,21 @@ x();
 
 function doMouseDown(event) {
 var pos = getMousePos(this, event);
-rect.x1=pos.x;
-rect.y1=pos.y;
+target.x1=pos.x;
+target.y1=pos.y;
 }
 
 function doMouseUp(event) {
 var pos = getMousePos(this, event);
-rect.x2=pos.x;
-rect.y2=pos.y;
+target.x2=pos.x;
+target.y2=pos.y;
+target.dialen= Math.sqrt(Math.pow(target.x1-target.x2,2) + Math.pow(target.y1-target.y2,2));
 draw();
 }
 
 function getMousePos(canvas, e) {
    var rect = canvas.getBoundingClientRect();
-    return {x: e.clientX - rect.left, y: e.clientY - rect.top};
+    return {x: (e.clientX - rect.left)/zoom, y: (e.clientY - rect.top)/zoom};
 }
 
 function draw() {
@@ -108,25 +109,29 @@ function x() {
      img.src=imgFile ;
 }
 
-function drawRect(ctx) {
-    console.log("drawRect X1="+rect.x1 + " Y1="+rect.y1 + " X2="+rect.x2 + " Y2="+rect.y2);
+function drawTarget(ctx) {
+    console.log("drawTarget X1="+target.x1 + " Y1="+target.y1 + " X2="+target.x2 + " Y2="+target.y2);
     ctx.beginPath();
-    ctx.moveTo(rect.x1*zoom,rect.y1*zoom);
-    ctx.lineTo(rect.x2*zoom,rect.y2*zoom);
+    ctx.moveTo(target.x1*zoom,target.y1*zoom);
+    ctx.lineTo(target.x2*zoom,target.y2*zoom);
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'green';
-    ctx.arc(rect.x1*zoom,rect.y1*zoom,2,0,2*Math.PI);
-    //var d= Math.sqrt(Math.pow(rect.x1*zoom-rect.x2*zoom,2) + Math.pow(rect.y1*zoom-rect.y2*zoom,2));
-    var d= Math.sqrt(Math.pow(rect.x1-rect.x2,2) + Math.pow(rect.y1-rect.y2,2));
+    ctx.stroke();
+    ctx.closePath();
+
+    //ctx.arc(target.x1*zoom,target.y1*zoom,2,0,2*Math.PI);
+    //var d= Math.sqrt(Math.pow(target.x1*zoom-target.x2*zoom,2) + Math.pow(target.y1*zoom-target.y2*zoom,2));
+    var d= target.dialen*zoom;
     console.log("d="+d);
     inc=d/split;
     r=0;
     while ( r< d) {
+      ctx.beginPath();
       r+=inc;
-      ctx.arc(rect.x1*zoom,rect.y1*zoom,r,0,2*Math.PI);
+      ctx.arc(target.x1*zoom,target.y1*zoom,r,0,2*Math.PI);
+      ctx.stroke();
+      ctx.closePath();
     } 
-    ctx.stroke();
-    ctx.closePath();
 }
 
 function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
@@ -182,7 +187,7 @@ function loadCanvas(img) {
     ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
     drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',step,0,stepWidth);
     drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,prop,propWidth);
-    drawRect(ctx);
+    drawTarget(ctx);
     
 };
 
