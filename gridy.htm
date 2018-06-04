@@ -12,11 +12,15 @@ step=40;
 prop=3;
 propWidth=1;
 stepWidth=1;
+split=4;
+rect={};
 var c = document.getElementById("gridCanvas");
 c.addEventListener("mousedown", doMouseDown, false);
+c.addEventListener("mouseup", doMouseUp, false);
 document.getElementById("iZoom").onchange= function() { zoom=parseFloat(document.getElementById("iZoom").value) ;x()};
 document.getElementById("iStep").onchange=function() { step=parseInt(document.getElementById("iStep").value) ;x()};
 document.getElementById("iProp").onchange=function() { prop=parseInt(document.getElementById("iProp").value) ;x()};
+document.getElementById("iSplit").onchange=function() { split=parseInt(document.getElementById("iSplit").value) ;x()};
 document.getElementById("imgUrl").onchange=function() { imgFile=document.getElementById("imgUrl").value ;x()};
 document.getElementById("iStepWidth").onchange= function() { stepWidth=parseFloat(document.getElementById("iStepWidth").value) ;x()};
 document.getElementById("iPropWidth").onchange= function() { propWidth=parseFloat(document.getElementById("iPropWidth").value) ;x()};
@@ -24,9 +28,25 @@ x();
 }
 
 function doMouseDown(event) {
-var x=event.pageX;
-var y=event.pageY;
-console.log("X="+x + " Y="+y);
+var pos = getMousePos(this, event);
+rect.x1=pos.x;
+rect.y1=pos.y;
+}
+
+function doMouseUp(event) {
+var pos = getMousePos(this, event);
+rect.x2=pos.x;
+rect.y2=pos.y;
+draw();
+}
+
+function getMousePos(canvas, e) {
+   var rect = canvas.getBoundingClientRect();
+    return {x: e.clientX - rect.left, y: e.clientY - rect.top};
+}
+
+function draw() {
+  x();
 }
 
 
@@ -71,6 +91,15 @@ function addProp(val) {
   x();
 }
 
+function addSplit(val) {
+  if ( split + val < 2) {
+     return;
+  }
+  split+=val;
+  document.getElementById("iSplit").value = split;
+  x();
+}
+
 function x() {
      var img = new Image();
         img.onload = function() {
@@ -79,8 +108,29 @@ function x() {
      img.src=imgFile ;
 }
 
+function drawRect(ctx) {
+    console.log("drawRect X1="+rect.x1 + " Y1="+rect.y1 + " X2="+rect.x2 + " Y2="+rect.y2);
+    ctx.beginPath();
+    ctx.moveTo(rect.x1*zoom,rect.y1*zoom);
+    ctx.lineTo(rect.x2*zoom,rect.y2*zoom);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'green';
+    ctx.arc(rect.x1*zoom,rect.y1*zoom,2,0,2*Math.PI);
+    //var d= Math.sqrt(Math.pow(rect.x1*zoom-rect.x2*zoom,2) + Math.pow(rect.y1*zoom-rect.y2*zoom,2));
+    var d= Math.sqrt(Math.pow(rect.x1-rect.x2,2) + Math.pow(rect.y1-rect.y2,2));
+    console.log("d="+d);
+    inc=d/split;
+    r=0;
+    while ( r< d) {
+      r+=inc;
+      ctx.arc(rect.x1*zoom,rect.y1*zoom,r,0,2*Math.PI);
+    } 
+    ctx.stroke();
+    ctx.closePath();
+}
+
 function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
-    console.log("xsize="+xsize+" ysize="+ysize+" color="+color+" step="+step+" factor="+factor+" width="+width) ;
+    console.log("drawGrid : xsize="+xsize+" ysize="+ysize+" color="+color+" step="+step+" factor="+factor+" width="+width) ;
     ctx.beginPath();
     ctx.font="20px Georgia";
     ctx.strokeStyle=color;
@@ -132,6 +182,8 @@ function loadCanvas(img) {
     ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
     drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',step,0,stepWidth);
     drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,prop,propWidth);
+    drawRect(ctx);
+    
 };
 
 </script>
@@ -146,6 +198,9 @@ Local file<input type="file" accept=".jpg, .jpeg, .png" id="input" onchange="han
 <tr><td>Zoom<input type="text" id="iZoom" value="1">
 <input type="button" id=="zoomIncr" value="+" onClick="addZoom(0.1)">
 <input type="button" id="zoomDecr" value="-" onClick="addZoom(-0.1)">
+<br/>Split<input type="text" id="iSplit" value="4">
+<input type="button" id=="splitIncr" value="+" onClick="addSplit(1)">
+<input type="button" id="splitDecr" value="-" onClick="addSplit(-1)">
 <br/>Step<input type="text" id="iStep" value="40">
 <input type="button" id=="stepIncr" value="+" onClick="addStep(10)">
 <input type="button" id="stepDecr" value="-" onClick="addStep(-10)">
