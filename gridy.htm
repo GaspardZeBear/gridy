@@ -28,7 +28,6 @@ gridy = {
   setString : function(pName) { this[pName]=document.getElementById(getIdFromPname(pName)).value ; },
   add : function(pName,val) {
          var r=gridy[pName] + val;
-         //document.getElementById(getIdFromPname(pName)).value = r;
          gridy.setVal(pName,r);
   },
   setVal: function(pName,val) {
@@ -36,12 +35,12 @@ gridy = {
          if ( val <= limits.max && val >= limits.min  ) {
            gridy[pName] = val ;
          }
-         //console.log("setVal " + pName + " " + val);
          document.getElementById(getIdFromPname(pName)).value = val; 
          x(); 
   },
 } ;
- 
+
+console.log("imgFile="+document.getElementById("iImgFile").value); 
  
 var c = document.getElementById("gridCanvas");
 c.addEventListener("mousedown", doMouseDown, false);
@@ -122,8 +121,31 @@ function drawTarget(ctx) {
     } 
 }
 
-function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
-    console.log("drawGrid : xsize="+xsize+" ysize="+ysize+" color="+color+" step="+step+" factor="+factor+" width="+width) ;
+function drawPropGrid(ctx,x0,y0,xsize,ysize,color,factor,width) {
+    ctx.beginPath();
+    ctx.font="20px Georgia";
+    ctx.strokeStyle=color;
+    if (width <= 0 ) {
+      return;
+    }
+    ctx.lineWidth=width;
+    xStep=Math.round(xsize/factor);
+    yStep=Math.round(ysize/factor);
+    for (i=0;i<xsize;i+=xStep) {
+      ctx.moveTo(x0+i,y0);
+      ctx.lineTo(x0+i,y0+ysize);
+      ctx.stroke();
+    }
+    for (i=0;i<ysize;i+=yStep) {
+      ctx.moveTo(x0,y0+i);
+      ctx.lineTo(x0+xsize,y0+i);
+      ctx.stroke();
+    }
+    ctx.closePath();
+}
+
+
+function drawConstantGrid(ctx,x0,y0,xsize,ysize,color,step,width) {
     ctx.beginPath();
     ctx.font="20px Georgia";
     ctx.strokeStyle=color;
@@ -132,33 +154,29 @@ function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
     }
     ctx.lineWidth=width;
     console.log(gridy.get('step'));
-    xStep=step;
-    yStep=step;
-    if (step == 0) {
-      xStep=Math.round(xsize/factor);
-      yStep=Math.round(ysize/factor);
-    }
-    for (i=0;i<xsize;i+=xStep) {
-      ctx.moveTo(i,0);
-      ctx.lineTo(i,ysize);
+    for (i=0;i<xsize;i+=step) {
+      ctx.moveTo(x0+i,y0);
+      ctx.lineTo(x0+i,y0+ysize);
       ctx.stroke();
     }
-    for (i=0;i<ysize;i+=yStep) {
-      ctx.moveTo(0,i);
-      ctx.lineTo(xsize,i);
+    for (i=0;i<ysize;i+=step) {
+      ctx.moveTo(x0,y0+i);
+      ctx.lineTo(x0+xsize,i+y0);
       ctx.stroke();
     }
     count=1;
-    for (i=step;i<cxsize;i+=step) {
-      ctx.fillText(count,i+step/2,step/2);
+    for (i=step;i<xsize;i+=step) {
+      ctx.fillText(count,x0+i+step/2,y0+step/2);
+      console.log("count="+count);
       count++;
     }
     count=1;
-    for (i=step;i<cysize;i+=step) {
-      ctx.fillText(count,step/2,i+step/2);
+    for (i=step;i<ysize;i+=step) {
+      ctx.fillText(count,x0+step/2,y0+i+step/2);
       count++;
     }
-     ctx.closePath();
+    ctx.stroke();
+    ctx.closePath();
 }
 
 function loadCanvas(img) {
@@ -173,10 +191,10 @@ function loadCanvas(img) {
     }
     var ctx = c.getContext("2d");
     ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
-    drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',gridy.step,0,gridy.stepWidth);
-    drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,gridy.prop,gridy.propWidth);
+    drawConstantGrid(ctx,0,0,img.width*ratio, img.height * ratio,'black',gridy.step,gridy.stepWidth);
+    drawConstantGrid(ctx,100, 100, 300,300,'blue',50,1);
+    drawPropGrid(ctx,0,0,img.width*ratio, img.height * ratio,'red',gridy.prop,gridy.propWidth);
     drawTarget(ctx);
-    
 };
 
 </script>
