@@ -6,29 +6,39 @@
 <script>
 
 window.onload= function() {
-//imgFile="gridy.png";
 gridy = {
   step: parseInt(document.getElementById("iStep").value),
+    stepProp:   {min:10,max:200},
   prop: parseInt(document.getElementById("iProp").value),
+    propProp:   {min:2,max:8},
   split: parseInt(document.getElementById("iSplit").value),
+    splitProp:{min:2,max:12},
   zoom: parseFloat(document.getElementById("iZoom").value),
-  zoomProp:{min:0.1,max:10},
+    zoomProp:{min:0.1,max:4},
   imgUrl: document.getElementById("iImgUrl").value,
   imgFile: document.getElementById("iImgFile").value,
   propWidth: parseFloat(document.getElementById("iPropWidth").value),
+    propWidthProp:{min:0.1,max:4},
   stepWidth: parseFloat(document.getElementById("iStepWidth").value), 
+    stepWidthProp:{min:0.1,max:4},
   target: {}, 
   get : function(pName) { return(this[pName]) ; },
-  setInt : function(pName) { this[pName]=parseInt(document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value) ; },
-  setFloat : function(pName) { this[pName]=parseFloat(document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value) ; },
-  setString : function(pName) { this[pName]=document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value ; },
-  incr : function(pName,val) {
+  setInt : function(pName) { this[pName]=parseInt( document.getElementById(getIdFromPname(pName)) ).value ; },
+  setFloat : function(pName) { this[pName]=parseFloat( document.getElementById(getIdFromPname(pName)) ).value ; },
+  setString : function(pName) { this[pName]=document.getElementById(getIdFromPname(pName)).value ; },
+  add : function(pName,val) {
          var r=gridy[pName] + val;
-         //var limits=gridy[pName+"Prop"];
-         //if ( r <= limits.max && r >= limits.min  ) {
-         gridy[pName] = r ;
-         document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value = gridy[pName]; 
-           
+         //document.getElementById(getIdFromPname(pName)).value = r;
+         gridy.setVal(pName,r);
+  },
+  setVal: function(pName,val) {
+         var limits=gridy[pName+"Prop"];
+         if ( val <= limits.max && val >= limits.min  ) {
+           gridy[pName] = val ;
+         }
+         //console.log("setVal " + pName + " " + val);
+         document.getElementById(getIdFromPname(pName)).value = val; 
+         x(); 
   },
 } ;
  
@@ -46,7 +56,9 @@ document.getElementById("iPropWidth").onchange= function() { gridy.setFloat("iPr
 x();
 }
 
-
+function getIdFromPname(pName) {
+return("i"+pName.charAt(0).toUpperCase() + pName.slice(1));
+}
 
 function doMouseDown(event) {
 var pos = getMousePos(this, event);
@@ -81,51 +93,6 @@ function handleFile(f) {
   x();
 }
 
-function addZoom(val) {
-  gridy.zoom+=val;
-  document.getElementById("iZoom").value = gridy.get("zoom");
-  x();
-}
-
-function addPropWidth(val) {
-  gridy.propWidth+=val;
-  document.getElementById("iPropWidth").value = gridy.propWidth;
-  x();
-}
-
-function addStepWidth(val) {
-  gridy.stepWidth+=val;
-  document.getElementById("iStepWidth").value = gridy.stepWidth;
-  x();
-}
-
-function addStep(val) {
-  if ( gridy.step + val < 20) {
-     return;
-  }
-  gridy.step+=val;
-  document.getElementById("iStep").value = gridy.step;
-  x();
-}
-
-function addProp(val) {
-  if ( gridy.prop + val < 2) {
-     return;
-  }
-  gridy.prop+=val;
-  document.getElementById("iProp").value = gridy.prop;
-  x();
-}
-
-function addSplit(val) {
-  if ( gridy.get("split") + val < 2) {
-     return;
-  }
-  gridy.split+=val;
-  document.getElementById("iSplit").value = gridy.get("split");
-  x();
-}
-
 function x() {
      var img = new Image();
         img.onload = function() {
@@ -135,22 +102,15 @@ function x() {
 }
 
 function drawTarget(ctx) {
-    //console.log("drawTarget X1="+target.x1 + " Y1="+target.y1 + " X2="+target.x2 + " Y2="+target.y2);
     ctx.beginPath();
     ctx.moveTo(gridy.target.x0*gridy.get("zoom"),gridy.target.y0*gridy.get("zoom"));
     ctx.lineTo(gridy.target.x2*gridy.get("zoom"),gridy.target.y2*gridy.get("zoom"));
-    //ctx.moveTo(target.x1*gridy.get("zoom"),target.y1*gridy.get("zoom"));
-    //ctx.lineTo(target.x2*gridy.get("zoom"),target.y2*gridy.get("zoom"));
     ctx.arc(gridy.target.x1*gridy.get("zoom"),gridy.target.y1*gridy.get("zoom"),2,0,2*Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'green';
     ctx.stroke();
     ctx.closePath();
-
-
-    //var d= Math.sqrt(Math.pow(target.x1*gridy.get("zoom")-target.x2*gridy.get("zoom"),2) + Math.pow(target.y1*gridy.get("zoom")-target.y2*gridy.get("zoom"),2));
     var d= gridy.target.dialen*gridy.get("zoom");
-    console.log("d="+d);
     inc=d/gridy.get("split");
     r=0;
     while ( r< d) {
@@ -202,7 +162,6 @@ function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
 }
 
 function loadCanvas(img) {
-    //alert("loadCanvas");   
     var c = document.getElementById("gridCanvas");
     c.width= img.width*gridy.get("zoom");
     c.height = img.height*gridy.get("zoom");
@@ -230,24 +189,24 @@ Local file<input type="file" accept=".jpg, .jpeg, .png" id="iImgFile" value="gri
 <br/>Url <input type="text" id="iImgUrl">
 </td></tr>
 <tr><td>Zoom<input type="text" id="iZoom" value="1">
-<input type="button" id=="zoomIncr" value="+" onClick="addZoom(0.1)">
-<input type="button" id="zoomDecr" value="-" onClick="addZoom(-0.1)">
+<input type="button" id=="zoomIncr" value="+" onClick="gridy.add('zoom',0.1)">
+<input type="button" id="zoomDecr" value="-" onClick="gridy.add('zoom',-0.1)">
 <br/>Split<input type="text" id="iSplit" value="4">
-<input type="button" id=="splitIncr" value="+" onClick="addSplit(1)">
-<input type="button" id="splitDecr" value="-" onClick="addSplit(-1)">
+<input type="button" id=="splitIncr" value="+" onClick="gridy.add('split',1)">
+<input type="button" id="splitDecr" value="-" onClick="gridy.add('split',-1)">
 <br/>Step<input type="text" id="iStep" value="40">
-<input type="button" id=="stepIncr" value="+" onClick="addStep(10)">
-<input type="button" id="stepDecr" value="-" onClick="addStep(-10)">
+<input type="button" id=="stepIncr" value="+" onClick="gridy.add('step',10)">
+<input type="button" id="stepDecr" value="-" onClick="gridy.add('step',-10)">
 stepWidth<input type="text" id="iStepWidth" value="1">
-<input type="button" id=="widthStepIncr" value="+" onClick="addStepWidth(0.1)">
-<input type="button" id="widthStepDecr" value="-" onClick="addStepWidth(-0.1)">
+<input type="button" id=="widthStepIncr" value="+" onClick="gridy.add('stepWidth',(0.1)">
+<input type="button" id="widthStepDecr" value="-" onClick="gridy.add('stepWidth',-0.1)">
 <br/>
 Proportion<input type="text" id="iProp" value="3">
-<input type="button" id=="propIncr" value="+" onClick="addProp(1)">
-<input type="button" id="propDecr" value="-" onClick="addProp(-1)">
+<input type="button" id=="propIncr" value="+" onClick="gridy.add('prop',1)">
+<input type="button" id="propDecr" value="-" onClick="gridy.add('prop',-1)">
 propWidth<input type="text" id="iPropWidth" value="1">
-<input type="button" id=="widthPropIncr" value="+" onClick="addPropWidth(0.1)">
-<input type="button" id="widthPropDecr" value="-" onClick="addPropWidth(-0.1)">
+<input type="button" id=="widthPropIncr" value="+" onClick="gridy.add('propWidth',0.1)">
+<input type="button" id="widthPropDecr" value="-" onClick="gridy.add('propWidth',-0.1)">
 </td></tr>
 </table>
 <table>
