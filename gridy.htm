@@ -29,6 +29,8 @@ x();
 
 function doMouseDown(event) {
 var pos = getMousePos(this, event);
+target.x0=pos.x;
+target.y0=pos.y;
 target.x1=pos.x;
 target.y1=pos.y;
 }
@@ -116,8 +118,10 @@ function x() {
 function drawTarget(ctx) {
     console.log("drawTarget X1="+target.x1 + " Y1="+target.y1 + " X2="+target.x2 + " Y2="+target.y2);
     ctx.beginPath();
-    ctx.moveTo(target.x1*zoom,target.y1*zoom);
+    ctx.moveTo(target.x0*zoom,target.y0*zoom);
     ctx.lineTo(target.x2*zoom,target.y2*zoom);
+    //ctx.moveTo(target.x1*zoom,target.y1*zoom);
+    //ctx.lineTo(target.x2*zoom,target.y2*zoom);
     ctx.arc(target.x1*zoom,target.y1*zoom,2,0,2*Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'green';
