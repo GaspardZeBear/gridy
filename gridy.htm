@@ -6,50 +6,69 @@
 <script>
 
 window.onload= function() {
-imgFile="gridy.png";
-zoom=1;
-step=40;
-prop=3;
-propWidth=1;
-stepWidth=1;
-split=4;
-target={};
+//imgFile="gridy.png";
+gridy = {
+  step: parseInt(document.getElementById("iStep").value),
+  prop: parseInt(document.getElementById("iProp").value),
+  split: parseInt(document.getElementById("iSplit").value),
+  zoom: parseFloat(document.getElementById("iZoom").value),
+  zoomProp:{min:0.1,max:10},
+  imgUrl: document.getElementById("iImgUrl").value,
+  imgFile: document.getElementById("iImgFile").value,
+  propWidth: parseFloat(document.getElementById("iPropWidth").value),
+  stepWidth: parseFloat(document.getElementById("iStepWidth").value), 
+  target: {}, 
+  get : function(pName) { return(this[pName]) ; },
+  setInt : function(pName) { this[pName]=parseInt(document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value) ; },
+  setFloat : function(pName) { this[pName]=parseFloat(document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value) ; },
+  setString : function(pName) { this[pName]=document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value ; },
+  incr : function(pName,val) {
+         var r=gridy[pName] + val;
+         //var limits=gridy[pName+"Prop"];
+         //if ( r <= limits.max && r >= limits.min  ) {
+         gridy[pName] = r ;
+         document.getElementById("i"+pName.charAt(0).toUpperCase() + pName.slice(1)).value = gridy[pName]; 
+           
+  },
+} ;
+ 
+ 
 var c = document.getElementById("gridCanvas");
 c.addEventListener("mousedown", doMouseDown, false);
 c.addEventListener("mouseup", doMouseUp, false);
-document.getElementById("iZoom").onchange= function() { zoom=parseFloat(document.getElementById("iZoom").value) ;x()};
-document.getElementById("iStep").onchange=function() { step=parseInt(document.getElementById("iStep").value) ;x()};
-document.getElementById("iProp").onchange=function() { prop=parseInt(document.getElementById("iProp").value) ;x()};
-document.getElementById("iSplit").onchange=function() { split=parseInt(document.getElementById("iSplit").value) ;x()};
-document.getElementById("imgUrl").onchange=function() { imgFile=document.getElementById("imgUrl").value ;x()};
-document.getElementById("iStepWidth").onchange= function() { stepWidth=parseFloat(document.getElementById("iStepWidth").value) ;x()};
-document.getElementById("iPropWidth").onchange= function() { propWidth=parseFloat(document.getElementById("iPropWidth").value) ;x()};
+document.getElementById("iZoom").onchange= function() { gridy.setFloat("iZoom") ;x()};
+document.getElementById("iStep").onchange=function() { gridy.setInt("iStep");x()};
+document.getElementById("iProp").onchange=function() { gridy.setInt("iProp") ;x()};
+document.getElementById("iSplit").onchange=function() { gridy.setInt("iSplit") ;x()};
+document.getElementById("iImgUrl").onchange=function() { gridy.setString("iImgFile") ;x()};
+document.getElementById("iStepWidth").onchange= function() { gridy.setFloat("iStepWidth") ;x()};
+document.getElementById("iPropWidth").onchange= function() { gridy.setFloat("iPropWidth") ;x()};
 x();
 }
 
+
+
 function doMouseDown(event) {
 var pos = getMousePos(this, event);
-target.x0=pos.x;
-target.y0=pos.y;
-target.x1=pos.x;
-target.y1=pos.y;
+gridy.target.x0=pos.x;
+gridy.target.y0=pos.y;
+gridy.target.x1=pos.x;
+gridy.target.y1=pos.y;
 }
 
 function doMouseUp(event) {
 var pos = getMousePos(this, event);
-target.x2=pos.x;
-target.y2=pos.y;
-//target.x1=2*target.x1-target.x2;
-//target.y1=2*target.y1-target.y2;
-target.x1=Math.abs(target.x1+target.x2)/2;
-target.y1=Math.abs(target.y1+target.y2)/2;
-target.dialen= Math.sqrt(Math.pow(target.x1-target.x2,2) + Math.pow(target.y1-target.y2,2));
+gridy.target.x2=pos.x;
+gridy.target.y2=pos.y;
+gridy.target.x1=Math.abs(gridy.target.x1+gridy.target.x2)/2;
+gridy.target.y1=Math.abs(gridy.target.y1+gridy.target.y2)/2;
+gridy.target.dialen= Math.sqrt(Math.pow(gridy.target.x1-gridy.target.x2,2) + Math.pow(gridy.target.y1-gridy.target.y2,2));
 draw();
 }
 
 function getMousePos(canvas, e) {
    var rect = canvas.getBoundingClientRect();
-    return {x: (e.clientX - rect.left)/zoom, y: (e.clientY - rect.top)/zoom};
+    return {x: (e.clientX - rect.left)/gridy.get("zoom"), y: (e.clientY - rect.top)/gridy.get("zoom")};
 }
 
 function draw() {
@@ -58,52 +77,52 @@ function draw() {
 
 
 function handleFile(f) {
-  imgFile=f[0].name;
+  gridy.imgFile=f[0].name;
   x();
 }
 
 function addZoom(val) {
-  zoom+=val;
-  document.getElementById("iZoom").value = zoom;
+  gridy.zoom+=val;
+  document.getElementById("iZoom").value = gridy.get("zoom");
   x();
 }
 
 function addPropWidth(val) {
-  propWidth+=val;
-  document.getElementById("iPropWidth").value = propWidth;
+  gridy.propWidth+=val;
+  document.getElementById("iPropWidth").value = gridy.propWidth;
   x();
 }
 
 function addStepWidth(val) {
-  stepWidth+=val;
-  document.getElementById("iStepWidth").value = stepWidth;
+  gridy.stepWidth+=val;
+  document.getElementById("iStepWidth").value = gridy.stepWidth;
   x();
 }
 
 function addStep(val) {
-  if ( step + val < 20) {
+  if ( gridy.step + val < 20) {
      return;
   }
-  step+=val;
-  document.getElementById("iStep").value = step;
+  gridy.step+=val;
+  document.getElementById("iStep").value = gridy.step;
   x();
 }
 
 function addProp(val) {
-  if ( prop + val < 2) {
+  if ( gridy.prop + val < 2) {
      return;
   }
-  prop+=val;
-  document.getElementById("iProp").value = prop;
+  gridy.prop+=val;
+  document.getElementById("iProp").value = gridy.prop;
   x();
 }
 
 function addSplit(val) {
-  if ( split + val < 2) {
+  if ( gridy.get("split") + val < 2) {
      return;
   }
-  split+=val;
-  document.getElementById("iSplit").value = split;
+  gridy.split+=val;
+  document.getElementById("iSplit").value = gridy.get("split");
   x();
 }
 
@@ -112,32 +131,32 @@ function x() {
         img.onload = function() {
         loadCanvas(img);
         };
-     img.src=imgFile ;
+     img.src=gridy.imgFile ;
 }
 
 function drawTarget(ctx) {
-    console.log("drawTarget X1="+target.x1 + " Y1="+target.y1 + " X2="+target.x2 + " Y2="+target.y2);
+    //console.log("drawTarget X1="+target.x1 + " Y1="+target.y1 + " X2="+target.x2 + " Y2="+target.y2);
     ctx.beginPath();
-    ctx.moveTo(target.x0*zoom,target.y0*zoom);
-    ctx.lineTo(target.x2*zoom,target.y2*zoom);
-    //ctx.moveTo(target.x1*zoom,target.y1*zoom);
-    //ctx.lineTo(target.x2*zoom,target.y2*zoom);
-    ctx.arc(target.x1*zoom,target.y1*zoom,2,0,2*Math.PI);
+    ctx.moveTo(gridy.target.x0*gridy.get("zoom"),gridy.target.y0*gridy.get("zoom"));
+    ctx.lineTo(gridy.target.x2*gridy.get("zoom"),gridy.target.y2*gridy.get("zoom"));
+    //ctx.moveTo(target.x1*gridy.get("zoom"),target.y1*gridy.get("zoom"));
+    //ctx.lineTo(target.x2*gridy.get("zoom"),target.y2*gridy.get("zoom"));
+    ctx.arc(gridy.target.x1*gridy.get("zoom"),gridy.target.y1*gridy.get("zoom"),2,0,2*Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'green';
     ctx.stroke();
     ctx.closePath();
 
 
-    //var d= Math.sqrt(Math.pow(target.x1*zoom-target.x2*zoom,2) + Math.pow(target.y1*zoom-target.y2*zoom,2));
-    var d= target.dialen*zoom;
+    //var d= Math.sqrt(Math.pow(target.x1*gridy.get("zoom")-target.x2*gridy.get("zoom"),2) + Math.pow(target.y1*gridy.get("zoom")-target.y2*gridy.get("zoom"),2));
+    var d= gridy.target.dialen*gridy.get("zoom");
     console.log("d="+d);
-    inc=d/split;
+    inc=d/gridy.get("split");
     r=0;
     while ( r< d) {
       ctx.beginPath();
       r+=inc;
-      ctx.arc(target.x1*zoom,target.y1*zoom,r,0,2*Math.PI);
+      ctx.arc(gridy.target.x1*gridy.get("zoom"),gridy.target.y1*gridy.get("zoom"),r,0,2*Math.PI);
       ctx.stroke();
       ctx.closePath();
     } 
@@ -152,6 +171,7 @@ function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
       return;
     }
     ctx.lineWidth=width;
+    console.log(gridy.get('step'));
     xStep=step;
     yStep=step;
     if (step == 0) {
@@ -184,8 +204,8 @@ function drawGrid(ctx,xsize,ysize,cxsize,cysize,color,step,factor,width) {
 function loadCanvas(img) {
     //alert("loadCanvas");   
     var c = document.getElementById("gridCanvas");
-    c.width= img.width*zoom;
-    c.height = img.height*zoom;
+    c.width= img.width*gridy.get("zoom");
+    c.height = img.height*gridy.get("zoom");
     xRatio= c.width/img.width;
     yRatio= c.height/img.height;
     ratio=xRatio;
@@ -194,8 +214,8 @@ function loadCanvas(img) {
     }
     var ctx = c.getContext("2d");
     ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
-    drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',step,0,stepWidth);
-    drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,prop,propWidth);
+    drawGrid(ctx,img.width*ratio, img.height * ratio,c.width,c.height,'black',gridy.step,0,gridy.stepWidth);
+    drawGrid(ctx,img.width*ratio, img.height * ratio,0,0,'red',0,gridy.prop,gridy.propWidth);
     drawTarget(ctx);
     
 };
@@ -206,8 +226,8 @@ function loadCanvas(img) {
 <body>
 <table border>
 <tr><td>
-Local file<input type="file" accept=".jpg, .jpeg, .png" id="input" onchange="handleFile(this.files)">
-<br/>Url <input type="text" id="imgUrl">
+Local file<input type="file" accept=".jpg, .jpeg, .png" id="iImgFile" value="gridy.png" onchange="handleFile(this.files)">
+<br/>Url <input type="text" id="iImgUrl">
 </td></tr>
 <tr><td>Zoom<input type="text" id="iZoom" value="1">
 <input type="button" id=="zoomIncr" value="+" onClick="addZoom(0.1)">
