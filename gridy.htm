@@ -8,9 +8,11 @@
 window.onload= function() {
 gridy = {
   step: parseInt(document.getElementById("iStep").value),
-    stepProp:   {min:10,max:200},
+  stepProp:   {min:10,max:200},
+
   stepWidth: parseFloat(document.getElementById("iStepWidth").value), 
     stepWidthProp:{min:0.1,max:4},
+    
   prop: parseInt(document.getElementById("iProp").value),
     propProp:   {min:2,max:8},
   propWidth: parseFloat(document.getElementById("iPropWidth").value),
@@ -30,13 +32,15 @@ gridy = {
   setFloat : function(pName) { this[pName]=parseFloat(document.getElementById(getIdFromPname(pName)).value) },
   setString : function(pName) { this[pName]=document.getElementById(getIdFromPname(pName)).value },
   add : function(pName,val) {
-         var r=gridy[pName] + val;
-         gridy.setVal(pName,r);
+         console.log(this);
+         console.log(this[pName]);
+         var r=this[pName] + val;
+         this.setVal(pName,r);
   },
   setVal: function(pName,val) {
-         var limits=gridy[pName+"Prop"];
+         var limits=this[pName+"Prop"];
          if ( val <= limits.max && val >= limits.min  ) {
-           gridy[pName] = val ;
+           this[pName] = val ;
          }
          document.getElementById(getIdFromPname(pName)).value = val; 
          x(); 
@@ -147,33 +151,32 @@ function drawPropGrid(ctx,x0,y0,xsize,ysize,color,factor,width) {
     ctx.closePath();
 }
 
-
-function drawConstantGrid(ctx,x0,y0,xsize,ysize,color,step,width) {
+function drawConstantGrid(ctx,grid) {
     ctx.beginPath();
     ctx.font="20px Georgia";
-    ctx.strokeStyle=color;
-    if (width <= 0 ) {
+    ctx.strokeStyle=grid.color;
+    if (grid.width <= 0 ) {
       return;
     }
-    ctx.lineWidth=width;
-    for (i=0;i<xsize;i+=step) {
-      ctx.moveTo(x0+i,y0);
-      ctx.lineTo(x0+i,y0+ysize);
+    ctx.lineWidth=grid.width;
+    for (i=0;i<grid.xsize;i+=grid.step) {
+      ctx.moveTo(grid.x0+i,grid.y0);
+      ctx.lineTo(grid.x0+i,grid.y0+grid.ysize);
       ctx.stroke();
     }
-    for (i=0;i<ysize;i+=step) {
-      ctx.moveTo(x0,y0+i);
-      ctx.lineTo(x0+xsize,i+y0);
+    for (i=0;i<grid.ysize;i+=grid.step) {
+      ctx.moveTo(grid.x0,grid.y0+i);
+      ctx.lineTo(grid.x0+grid.xsize,i+grid.y0);
       ctx.stroke();
     }
     count=1;
-    for (i=step;i<xsize;i+=step) {
-      ctx.fillText(count,x0+i+step/2,y0+step/2);
+    for (i=grid.step;i<grid.xsize;i+=grid.step) {
+      ctx.fillText(count,grid.x0+i+grid.step/2,grid.y0+grid.step/2);
       count++;
     }
     count=1;
-    for (i=step;i<ysize;i+=step) {
-      ctx.fillText(count,x0+step/2,y0+i+step/2);
+    for (i=grid.step;i<grid.ysize;i+=grid.step) {
+      ctx.fillText(count,grid.x0+grid.step/2,grid.y0+i+grid.step/2);
       count++;
     }
     ctx.stroke();
@@ -192,8 +195,10 @@ function loadCanvas(img) {
     }
     var ctx = c.getContext("2d");
     ctx.drawImage(img, 0, 0, img.width*ratio, img.height * ratio);
-    drawConstantGrid(ctx,0,0,img.width*ratio, img.height * ratio,'black',gridy.step,gridy.stepWidth);
-    drawConstantGrid(ctx,100, 100, 300,300,'blue',50,1);
+    grid0={x0:0,y0:0,xsize:img.width*ratio,ysize:img.height * ratio,color:'black',step:gridy.step,width:gridy.stepWidth};
+    drawConstantGrid(ctx,grid0);
+    //grid1={x0:200,y0:200,xsize:400,ysize:600,color:'blue',step:60,width:2};
+    drawConstantGrid(ctx,grid1);
     drawPropGrid(ctx,0,0,img.width*ratio, img.height * ratio,'red',gridy.prop,gridy.propWidth);
     drawTarget(ctx);
 };
@@ -217,7 +222,7 @@ Local file<input type="file" accept=".jpg, .jpeg, .png" id="input" onchange="han
 <input type="button" id=="stepIncr" value="+" onClick="gridy.add('step',10)">
 <input type="button" id="stepDecr" value="-" onClick="gridy.add('step',-10)">
 stepWidth<input type="text" id="iStepWidth" value="1">
-<input type="button" id=="widthStepIncr" value="+" onClick="gridy.add('stepWidth',(0.1)">
+<input type="button" id=="widthStepIncr" value="+" onClick="gridy.add('stepWidth',0.1)">
 <input type="button" id="widthStepDecr" value="-" onClick="gridy.add('stepWidth',-0.1)">
 <br/>
 Proportion<input type="text" id="iProp" value="3">
