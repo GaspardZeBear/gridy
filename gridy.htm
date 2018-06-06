@@ -9,23 +9,26 @@ window.onload= function() {
 gridy = {
   step: parseInt(document.getElementById("iStep").value),
     stepProp:   {min:10,max:200},
-  prop: parseInt(document.getElementById("iProp").value),
-    propProp:   {min:2,max:8},
-  split: parseInt(document.getElementById("iSplit").value),
-    splitProp:{min:2,max:12},
-  zoom: parseFloat(document.getElementById("iZoom").value),
-    zoomProp:{min:0.1,max:4},
-  imgUrl: document.getElementById("iImgUrl").value,
-  imgFile: document.getElementById("iImgFile").value,
-  propWidth: parseFloat(document.getElementById("iPropWidth").value),
-    propWidthProp:{min:0.1,max:4},
   stepWidth: parseFloat(document.getElementById("iStepWidth").value), 
     stepWidthProp:{min:0.1,max:4},
-  target: {}, 
+  prop: parseInt(document.getElementById("iProp").value),
+    propProp:   {min:2,max:8},
+  propWidth: parseFloat(document.getElementById("iPropWidth").value),
+    propWidthProp:{min:0.1,max:4},
+
+  zoom: parseFloat(document.getElementById("iZoom").value),
+    zoomProp:{min:0.1,max:4},
+  imgUrl: "gridy.png",
+  imgFile: "gridy.png",
+
+  target: {},
+  split: parseInt(document.getElementById("iSplit").value),
+    splitProp:{min:2,max:12},
+   
   get : function(pName) { return(this[pName]) ; },
-  setInt : function(pName) { this[pName]=parseInt( document.getElementById(getIdFromPname(pName)) ).value ; },
-  setFloat : function(pName) { this[pName]=parseFloat( document.getElementById(getIdFromPname(pName)) ).value ; },
-  setString : function(pName) { this[pName]=document.getElementById(getIdFromPname(pName)).value ; },
+  setInt : function(pName) { this[pName]=parseInt( document.getElementById(getIdFromPname(pName)).value)},
+  setFloat : function(pName) { this[pName]=parseFloat(document.getElementById(getIdFromPname(pName)).value) },
+  setString : function(pName) { this[pName]=document.getElementById(getIdFromPname(pName)).value },
   add : function(pName,val) {
          var r=gridy[pName] + val;
          gridy.setVal(pName,r);
@@ -40,22 +43,22 @@ gridy = {
   },
 } ;
 
-console.log("imgFile="+document.getElementById("iImgFile").value); 
- 
 var c = document.getElementById("gridCanvas");
 c.addEventListener("mousedown", doMouseDown, false);
 c.addEventListener("mouseup", doMouseUp, false);
-document.getElementById("iZoom").onchange= function() { gridy.setFloat("iZoom") ;x()};
-document.getElementById("iStep").onchange=function() { gridy.setInt("iStep");x()};
-document.getElementById("iProp").onchange=function() { gridy.setInt("iProp") ;x()};
-document.getElementById("iSplit").onchange=function() { gridy.setInt("iSplit") ;x()};
-document.getElementById("iImgUrl").onchange=function() { gridy.setString("iImgFile") ;x()};
-document.getElementById("iStepWidth").onchange= function() { gridy.setFloat("iStepWidth") ;x()};
-document.getElementById("iPropWidth").onchange= function() { gridy.setFloat("iPropWidth") ;x()};
+document.getElementById("iZoom").onchange= function() { gridy.setFloat("zoom");x()};
+document.getElementById("iStep").onchange=function() { gridy.setInt("step");x()};
+document.getElementById("iProp").onchange=function() { gridy.setInt("prop") ;x()};
+document.getElementById("iSplit").onchange=function() { gridy.setInt("split") ;x()};
+document.getElementById("iImgUrl").onchange=function() { gridy.setString("imgUrl") ;gridy.imgFile=gridy.imgUrl;x()};
+document.getElementById("iStepWidth").onchange= function() { gridy.setFloat("stepWidth") ;x()};
+document.getElementById("iPropWidth").onchange= function() { gridy.setFloat("propWidth") ;x()};
 x();
 }
 
 function getIdFromPname(pName) {
+var id= "i"+pName.charAt(0).toUpperCase() + pName.slice(1);
+console.log("getId ... <" + pName + "> id=" + id);
 return("i"+pName.charAt(0).toUpperCase() + pName.slice(1));
 }
 
@@ -153,7 +156,6 @@ function drawConstantGrid(ctx,x0,y0,xsize,ysize,color,step,width) {
       return;
     }
     ctx.lineWidth=width;
-    console.log(gridy.get('step'));
     for (i=0;i<xsize;i+=step) {
       ctx.moveTo(x0+i,y0);
       ctx.lineTo(x0+i,y0+ysize);
@@ -167,7 +169,6 @@ function drawConstantGrid(ctx,x0,y0,xsize,ysize,color,step,width) {
     count=1;
     for (i=step;i<xsize;i+=step) {
       ctx.fillText(count,x0+i+step/2,y0+step/2);
-      console.log("count="+count);
       count++;
     }
     count=1;
@@ -203,7 +204,7 @@ function loadCanvas(img) {
 <body>
 <table border>
 <tr><td>
-Local file<input type="file" accept=".jpg, .jpeg, .png" id="iImgFile" value="gridy.png" onchange="handleFile(this.files)">
+Local file<input type="file" accept=".jpg, .jpeg, .png" id="input" onchange="handleFile(this.files)">
 <br/>Url <input type="text" id="iImgUrl">
 </td></tr>
 <tr><td>Zoom<input type="text" id="iZoom" value="1">
@@ -230,4 +231,5 @@ propWidth<input type="text" id="iPropWidth" value="1">
 <table>
 <tr><td><canvas id="gridCanvas"> </canvas></td></tr>
 </table>
+</body>
 </html>
